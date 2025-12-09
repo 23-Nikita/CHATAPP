@@ -6,7 +6,7 @@ Future updates will include real-time messaging using Socket.io.
 
 ---
 
-## 🚀 Features (Current Progress)
+##  Features (Current Progress)
 - User authentication (Signup/Login)
 - MongoDB database connection
 - REST API using Node.js + Express
@@ -16,7 +16,7 @@ Future updates will include real-time messaging using Socket.io.
 
 ---
 
-## 🔧 Tech Stack
+## Tech Stack
 **Frontend:**  
 - React (Vite)  
 - Axios  
