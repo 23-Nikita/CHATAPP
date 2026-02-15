@@ -1,170 +1,186 @@
+import React from "react";
 import { useForm } from "react-hook-form";
 import axios from "axios";
-export default function Signup(){
-     const {
+import { useAuth } from "../context/Authprovider";
+import { Link } from "react-router-dom";
+import toast from "react-hot-toast";
+function Signup() {
+  const [authUser, setAuthUser] = useAuth();
+  const {
     register,
     handleSubmit,
     watch,
     formState: { errors },
-  } = useForm()
+  } = useForm();
 
-  //watch the password and confirm password fields
+  // watch the password and confirm password fields
+  const password = watch("password", "");
+  const confirmPassword = watch("confirmPassword", "");
+  console.log(confirmPassword);
 
-  const password = watch("password","");
-  const confirmPassword= watch("confirmPassword","");
+  const validatePasswordMatch = (value) => {
+    return value === password || "Passwords do not match";
+  };
 
-    const validatePasswordMatch=(value)=>{
-      return value===password || "Passwords do not match"
-    }
-     const onSubmit = (data) => {
-      const userInfo={
+  const onSubmit = async (data) => {
+    const userInfo = {
       fullname: data.fullname,
       email: data.email,
       password: data.password,
-      confirmPassword:data.confirmPassword
-     }
-    
-    //  console.log(userInfo);
-    axios.post("http://localhost:3001/api/user/signup",userInfo)
-    .then((response)=>{
-      console.log(response.data) 
-      if(response.data){
-      alert("signup sucessful");
-      }
-      localStorage.setItem("ChatUser",response.data);
-    })
-    .catch((error)=>{
-      if(error.response){
-        alert("Error: "+ error.response.data.error)
-      }
-    })
+      confirmPassword: data.confirmPassword,
+    };
+    // console.log(userInfo);
+    await axios
+      .post("/api/user/signup", userInfo)
+      .then((response) => {
+        if (response.data) {
+          toast.success("Signup successful");
+        }
+        localStorage.setItem("ChatApp", JSON.stringify(response.data));
+        setAuthUser(response.data);
+      })
+      .catch((error) => {
+        if (error.response) {
+          toast.error("Error: " + error.response.data.error);
+        }
+      });
   };
-return(    
-<>
-<div className="flex h-screen items-center justify-center">
-  <form onSubmit={handleSubmit(onSubmit)} className="border border-white px-6 py-2 rounded-md space-y-3 w-96">
-    <h1 className="test-2xl text-center">
-    Chat<span className="text-green-500 font-semibold"> App</span></h1>
-    <h2 className="text-xl text-white font-bold">Signup</h2>
-                
-{/* Fullname */}
-    <label className="input validator ">
-  <svg className="h-[1em] opacity-50" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-    <g
-      strokeLinejoin="round"
-      strokeLinecap="round"
-      strokeWidth="2.5"
-      fill="none"
-      stroke="currentColor"
-    >
-      <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path>
-      <circle cx="12" cy="7" r="4"></circle>
-    </g>
-  </svg>
-  <input
-    type="text"
-    required
-    placeholder="fullname"
-    pattern="[A-Za-z][A-Za-z0-9\-]*"
-    minlength="3"
-    maxlength="30"
-    title="Only letters, numbers or dash"
-     {...register("fullname", { required: true })} 
-  />
-</label>
- {errors.fullname && <span>This field is required</span>}
-<p className="validator-hint">
-  Must be 3 to 30 characters
-  <br />containing only letters, numbers or dash
-</p>          
-{/* mail */}
-<label className="input validator">
-  <svg className="h-[1em] opacity-50" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-    <g
-      strokeLinejoin="round"
-      strokeLinecap="round"
-      strokeWidth="2.5"
-      fill="none"
-      stroke="currentColor"
-    >
-      <rect width="20" height="16" x="2" y="4" rx="2"></rect>
-      <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"></path>
-    </g>
-  </svg>
-  <input type="email" placeholder="mail@site.com" required {...register("email", { required: true })} />
-</label>
- {errors.email&& <span>This field is required</span>}
-<div className="validator-hint hidden">Enter valid email address</div>
+  return (
+    <>
+      <div className="flex h-screen items-center justify-center">
+        <form
+          onSubmit={handleSubmit(onSubmit)}
+          className="border border-white px-6 py-2 rounded-md space-y-3 w-96"
+        >
+          <h1 className="text-2xl text-center">
+            Chat<span className="text-green-500 font-semibold">App</span>
+          </h1>
+          <h2 className="text-xl text-white font-bold">Signup</h2>
+          <br />
+          {/* Fullname */}
+          <label className="input input-bordered flex items-center gap-2">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 16 16"
+              fill="currentColor"
+              className="w-4 h-4 opacity-70"
+            >
+              <path d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6ZM12.735 14c.618 0 1.093-.561.872-1.139a6.002 6.002 0 0 0-11.215 0c-.22.578.254 1.139.872 1.139h9.47Z" />
+            </svg>
+            <input
+              type="text"
+              className="grow"
+              placeholder="Fullname"
+              {...register("fullname", { required: true })}
+            />
+          </label>
+          {errors.fullname && (
+            <span className="text-red-500 text-sm font-semibold">
+              This field is required
+            </span>
+          )}
+          {/* Email */}
+          <label className="input input-bordered flex items-center gap-2">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 16 16"
+              fill="currentColor"
+              className="w-4 h-4 opacity-70"
+            >
+              <path d="M2.5 3A1.5 1.5 0 0 0 1 4.5v.793c.026.009.051.02.076.032L7.674 8.51c.206.1.446.1.652 0l6.598-3.185A.755.755 0 0 1 15 5.293V4.5A1.5 1.5 0 0 0 13.5 3h-11Z" />
+              <path d="M15 6.954 8.978 9.86a2.25 2.25 0 0 1-1.956 0L1 6.954V11.5A1.5 1.5 0 0 0 2.5 13h11a1.5 1.5 0 0 0 1.5-1.5V6.954Z" />
+            </svg>
+            <input
+              type="email"
+              className="grow"
+              placeholder="Email"
+              {...register("email", { required: true })}
+            />
+          </label>
+          {errors.email && (
+            <span className="text-red-500 text-sm font-semibold">
+              This field is required
+            </span>
+          )}
 
-{/* password */}
-<label className="input validator">
-  <svg className="h-[1em] opacity-50" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-    <g
-      strokeLinejoin="round"
-      strokeLinecap="round"
-      strokeWidth="2.5"
-      fill="none"
-      stroke="currentColor"
-    >
-      <path
-        d="M2.586 17.414A2 2 0 0 0 2 18.828V21a1 1 0 0 0 1 1h3a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h1a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h.172a2 2 0 0 0 1.414-.586l.814-.814a6.5 6.5 0 1 0-4-4z"
-      ></path>
-      <circle cx="16.5" cy="7.5" r=".5" fill="currentColor"></circle>
-    </g>
-  </svg>
-  <input
-    type="password"
-    required
-    placeholder="Password"
-    minlength="8"
-    pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}"
-    title="Must be more than 8 characters, including number, lowercase letter, uppercase letter"
-    {...register("password", { required: true })} 
-  />
-</label>
- {errors.exampleRequired && <span>This field is required</span>}
-<p className="validator-hint hidden">
-  Must be more than 8 characters, including
-  <br />At least one number <br />At least one lowercase letter <br />At least one uppercase letter
-</p>
+          {/* Password */}
+          <label className="input input-bordered flex items-center gap-2">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 16 16"
+              fill="currentColor"
+              className="w-4 h-4 opacity-70"
+            >
+              <path
+                fillRule="evenodd"
+                d="M14 6a4 4 0 0 1-4.899 3.899l-1.955 1.955a.5.5 0 0 1-.353.146H5v1.5a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1-.5-.5v-2.293a.5.5 0 0 1 .146-.353l3.955-3.955A4 4 0 1 1 14 6Zm-4-2a.75.75 0 0 0 0 1.5.5.5 0 0 1 .5.5.75.75 0 0 0 1.5 0 2 2 0 0 0-2-2Z"
+                clipRule="evenodd"
+              />
+            </svg>
+            <input
+              type="password"
+              className="grow"
+              placeholder="password"
+              {...register("password", { required: true })}
+            />
+          </label>
+          {errors.password && (
+            <span className="text-red-500 text-sm font-semibold">
+              This field is required
+            </span>
+          )}
 
-{/* confirmPassword */}
-<label className="input validator">
-  <svg className="h-[1em] opacity-50" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-    <g
-      strokeLinejoin="round"
-      strokeLinecap="round"
-      strokeWidth="2.5"
-      fill="none"
-      stroke="currentColor"
-    >
-      <path
-        d="M2.586 17.414A2 2 0 0 0 2 18.828V21a1 1 0 0 0 1 1h3a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h1a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h.172a2 2 0 0 0 1.414-.586l.814-.814a6.5 6.5 0 1 0-4-4z"
-      ></path>
-      <circle cx="16.5" cy="7.5" r=".5" fill="currentColor"></circle>
-    </g>
-  </svg>
-  <input
-    type="password"
-    required
-    placeholder="confirmPassword"
-    minlength="8"
-    pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}"
-    title="Must be more than 8 characters, including number, lowercase letter, uppercase letter"
-    {...register("confirmPassword", { required: true , validate:validatePasswordMatch})} 
-  />
-</label>
- {errors.confirmPassword && <span>{errors.confirmPassword.message}</span>}
-<p className="validator-hint hidden">
-  Must be more than 8 characters, including
-  <br />At least one number <br />At least one lowercase letter <br />At least one uppercase letter
-</p>
-         <div className="flex jsutify-between">
-             <p>Have an accout? <span className="text-blue-500 underline cursor-pointer ml-1">Login</span></p>
-            <input type="submit" value="Signup" className="text-white bg-green-500 px-2 py-1 courser-pointer rounded-lg "/>
-            </div>
-            </form>
-        </div>
-        </>
-    )
+          {/*Confirm Password */}
+          <label className="input input-bordered flex items-center gap-2">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 16 16"
+              fill="currentColor"
+              className="w-4 h-4 opacity-70"
+            >
+              <path
+                fillRule="evenodd"
+                d="M14 6a4 4 0 0 1-4.899 3.899l-1.955 1.955a.5.5 0 0 1-.353.146H5v1.5a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1-.5-.5v-2.293a.5.5 0 0 1 .146-.353l3.955-3.955A4 4 0 1 1 14 6Zm-4-2a.75.75 0 0 0 0 1.5.5.5 0 0 1 .5.5.75.75 0 0 0 1.5 0 2 2 0 0 0-2-2Z"
+                clipRule="evenodd"
+              />
+            </svg>
+            <input
+              type="password"
+              className="grow"
+              placeholder="confirm password"
+              {...register("confirmPassword", {
+                required: true,
+                validate: validatePasswordMatch,
+              })}
+            />
+          </label>
+          {errors.confirmPassword && (
+            <span className="text-red-500 text-sm font-semibold">
+              {errors.confirmPassword.message}
+            </span>
+          )}
+
+          {/* Text & Button */}
+          <div className="flex justify-between">
+            <p>
+              Have an account?
+              <Link
+                to="/login"
+                className="text-blue-500 underline cursor-pointer ml-1"
+              >
+                Login
+              </Link>
+            </p>
+            <input
+              type="submit"
+              value="Signup"
+              className="text-white bg-green-500 px-2 py-1 cursor-pointer rounded-lg"
+            />
+          </div>
+        </form>
+      </div>
+    </>
+  );
 }
+
+export default Signup;
